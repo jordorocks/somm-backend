@@ -1,7 +1,11 @@
 [build]
-  functions = "."
+  functions = "functions"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/index/:splat"
+  from = "/submit"
+  to = "/.netlify/functions/index"
   status = 200
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["express"]
