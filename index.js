@@ -61,6 +61,7 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
     });
 
     let recommendation = JSON.parse(completion.choices[0].message.content);
+    console.log('Raw AI response:', recommendation);
 
     // Safeguard: Truncate if limits are exceeded and standardize price format
     recommendation.explanation = recommendation.explanation.split(' ').slice(0, 150).join(' ') + (recommendation.explanation.split(' ').length > 150 ? '...' : '');
@@ -70,6 +71,8 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
       price: standardizePrice(wine.price)
     }));
     recommendation.conclusion = recommendation.conclusion.split(' ').slice(0, 50).join(' ') + (recommendation.conclusion.split(' ').length > 50 ? '...' : '');
+
+    console.log('Processed recommendation:', recommendation);
 
     res.json(recommendation);
   } catch (error) {
