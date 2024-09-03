@@ -54,15 +54,23 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
     await worker.terminate();
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a helpful sommelier assistant who uses fun, friendly mildly flirty language." },
-        { role: "user", content: `Given the following wine list and dish, recommend EXACTLY 3 wines that would pair well. Your response MUST contain only 3 wine recommendations, no more and no less. NEVER give an incomplete response, all sentences must be finished.Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of EXACTLY 3 objects with 'name', 'price', and 'description' ), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
+        { role: "user", content: `Given the following wine list and dish, recommend EXACTLY 3 wines that would pair well. Your response MUST contain only 3 wine recommendations, no more and no less. NEVER give an incomplete response, all sentences must be finished. Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of EXACTLY 3 objects with 'name', 'price', and 'description' ), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
       ],
       max_tokens: 2500,
     });
 
-    let recommendation = JSON.parse(completion.choices[0].message.content);
+    let recommendation;
+    try {
+      recommendation = JSON.parse(completion.choices[0].message.content);
+    } catch (error) {
+      console.error('Failed to parse AI response:', error);
+      console.log('Raw AI response:', completion.choices[0].message.content);
+      throw new Error('AI response was not valid JSON');
+    }
+
     console.log('Raw AI response:', recommendation);
 
     // Check if there are exactly 3 recommendations
@@ -100,3 +108,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // For Netlify Functions
 module.exports.handler = serverless(app);
+
+app.get('/test', (req, res) => {
+  res.json({ message: 'Test endpoint working' });
+});
