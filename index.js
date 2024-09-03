@@ -20,6 +20,23 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+function standardizePrice(price) {
+  // Remove any non-numeric characters except for '/' and '.'
+  price = price.replace(/[^\d./]/g, '');
+  
+  // Split the price if it contains a slash (for glass/bottle prices)
+  const prices = price.split('/');
+  
+  // Format each price
+  const formattedPrices = prices.map(p => {
+    const num = parseFloat(p);
+    return isNaN(num) ? p : `$${num.toFixed(2)}`;
+  });
+  
+  // Join the prices back together if there were multiple
+  return formattedPrices.join(' / ');
+}
+
 app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
   try {
     const { dish } = req.body;
@@ -45,11 +62,12 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
 
     let recommendation = JSON.parse(completion.choices[0].message.content);
 
-    // Safeguard: Truncate if limits are exceeded
+    // Safeguard: Truncate if limits are exceeded and standardize price format
     recommendation.explanation = recommendation.explanation.split(' ').slice(0, 150).join(' ') + (recommendation.explanation.split(' ').length > 150 ? '...' : '');
     recommendation.recommendations = recommendation.recommendations.slice(0, 3).map(wine => ({
       ...wine,
-      description: wine.description.split(' ').slice(0, 50).join(' ') + (wine.description.split(' ').length > 50 ? '...' : '')
+      description: wine.description.split(' ').slice(0, 50).join(' ') + (wine.description.split(' ').length > 50 ? '...' : ''),
+      price: standardizePrice(wine.price)
     }));
     recommendation.conclusion = recommendation.conclusion.split(' ').slice(0, 50).join(' ') + (recommendation.conclusion.split(' ').length > 50 ? '...' : '');
 
