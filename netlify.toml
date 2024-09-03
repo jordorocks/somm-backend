@@ -2,8 +2,8 @@
   functions = "functions"
 
 [[redirects]]
-  from = "/submit"
-  to = "/.netlify/functions/index"
+  from = "/*"
+  to = "/.netlify/functions/index/:splat"
   status = 200
 
 [functions]

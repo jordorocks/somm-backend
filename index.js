@@ -9,10 +9,13 @@ require('dotenv').config();
 const app = express();
 
 app.use(cors({
-  origin: ['https://sommai.netlify.app', 'http://localhost:3000', 'https://sommai.netlify.app:443'],
-  methods: ['GET', 'POST'],
+  origin: ['https://sommai.netlify.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Make sure this is placed before your route definitions
+app.options('*', cors()); // Enable pre-flight requests for all routes
 
 app.use(express.json());
 
@@ -39,7 +42,7 @@ function standardizePrice(price) {
   return formattedPrices.join(' / ');
 }
 
-app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
+app.post('/.netlify/functions/index/submit', upload.single('wineListPhoto'), async (req, res) => {
   try {
     const { dish } = req.body;
     
