@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "netlify-lambda build ."
+    "build": "netlify-lambda build .",
+    "netlify": "netlify",
+    "logs": "netlify functions:logs"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +24,7 @@
     "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
+    "netlify-cli": "^17.34.3",
     "netlify-lambda": "^2.0.16"
   }
 }
