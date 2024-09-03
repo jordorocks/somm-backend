@@ -8,72 +8,18 @@ require('dotenv').config();
 
 const app = express();
 
-// Logging
-console.log('Function loaded');
+// Enable CORS for all routes
+app.use(cors());
 
-// CORS configuration
-app.use(cors({
-  origin: ['https://sommai.netlify.app', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
-
-// Add this line to handle preflight requests
-app.options('*', cors());
-
-// Logging middleware
-app.use((req, res, next) => {
-  console.log(`Received ${req.method} request to ${req.url}`);
-  next();
+// Add a simple GET route
+app.get('/', (req, res) => {
+  res.json({ message: "Hello from the API" });
 });
 
-const upload = multer({ dest: '/tmp/uploads/' });
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+// Add a catch-all route
+app.use('*', (req, res) => {
+  res.json({ message: "Catch-all route" });
 });
 
-// Your existing helper functions here (e.g., standardizePrice)
-
-app.post('/', upload.single('wineListPhoto'), async (req, res) => {
-  console.log('Request received:', req.method, req.url);
-  console.log('Request headers:', req.headers);
-  console.log('Request body:', req.body);
-  console.log('Request file:', req.file);
-
-  try {
-    const { dish } = req.body;
-    
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    // Your existing logic here (OCR, OpenAI call, etc.)
-    // ...
-
-    res.json(recommendation);
-  } catch (error) {
-    console.error('Error details:', error);
-    res.status(500).json({ 
-      error: 'An error occurred while processing your request', 
-      details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
-
-// For local development
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 8888;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}
-
-// At the end of the file
+// Export the serverless function
 module.exports.handler = serverless(app);
