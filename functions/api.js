@@ -8,8 +8,11 @@ require('dotenv').config();
 
 const app = express();
 
-// Enable CORS for all routes
-app.use(cors());
+// Replace the existing CORS configuration with this:
+app.use(cors({
+  origin: 'https://sommai.netlify.app',
+  credentials: true
+}));
 
 // Add a simple GET route
 app.get('/', (req, res) => {
