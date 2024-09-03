@@ -5,9 +5,21 @@ const multer = require('multer');
 const { createWorker } = require('tesseract.js');
 const OpenAI = require('openai');
 require('dotenv').config();
+const path = require('path');
 
 const app = express();
-const upload = multer({ dest: '/tmp/uploads/' });
+
+// Configure Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '/tmp/uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ storage: storage });
 
 console.log('API function loaded');
 
