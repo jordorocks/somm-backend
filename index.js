@@ -55,7 +55,7 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a helpful sommelier assistant who uses fun, friendly mildly flirty language." },
-        { role: "user", content: `Given the following wine list and dish, recommend EXACTLY 3 wines that would pair well. Your response MUST contain only 3 wine recommendations, no more and no less. Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of EXACTLY 3 objects with 'name', 'price', and 'description' (max 50 words each)), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
+        { role: "user", content: `Given the following wine list and dish, recommend EXACTLY 3 wines that would pair well. Your response MUST contain only 3 wine recommendations, no more and no less. Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of EXACTLY 3 objects with 'name', 'price', and 'description' ), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
       ],
       max_tokens: 2500,
     });
