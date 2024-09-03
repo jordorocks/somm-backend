@@ -52,7 +52,7 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
     await worker.terminate();
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "You are a helpful sommelier assistant who uses fun, friendly mildly flirty language." },
         { role: "user", content: `Given the following wine list and dish, recommend EXACTLY 3 wines that would pair well. Your response MUST contain only 3 wine recommendations, no more and no less. NEVER give an incomplete response, all sentences must be finished.Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of EXACTLY 3 objects with 'name', 'price', and 'description' ), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
