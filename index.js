@@ -9,7 +9,9 @@ require('dotenv').config();
 const app = express();
 
 app.use(cors({
-  origin: ['https://sommai.netlify.app', 'http://localhost:3000']
+  origin: ['https://sommai.netlify.app', 'http://localhost:3000', 'https://sommai.netlify.app:443'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -81,8 +83,12 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
 
     res.json(recommendation);
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'An error occurred while processing your request' });
+    console.error('Error details:', error);
+    res.status(500).json({ 
+      error: 'An error occurred while processing your request', 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
