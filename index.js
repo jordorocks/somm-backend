@@ -54,8 +54,8 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are a helpful sommelier assistant." },
-        { role: "user", content: `Given the following wine list and dish, recommend 3 wines that would pair well. Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of objects with 'name', 'price', and 'description' (max 50 words each)), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
+        { role: "system", content: "You are a helpful sommelier assistant who uses fun, mildly flirty language." },
+        { role: "user", content: `Given the following wine list and dish, recommend maximum 3 wines that would pair well. Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of objects with 'name', 'price', and 'description' (max 50 words each)), and 'conclusion' (max 50 words). Ensure all text fits within these limits and that the JSON is properly formatted. Wine list: ${text}. Dish: ${dish}` }
       ],
       max_tokens: 1500,
     });
