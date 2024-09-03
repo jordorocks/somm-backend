@@ -109,6 +109,11 @@ app.get('/', (req, res) => {
   res.json({ message: "Hello from the API" });
 });
 
+// New test route
+app.get('/test', (req, res) => {
+  res.json({ message: "Test route success!" });
+});
+
 // Move the catch-all route to the end of your routes
 app.use('*', (req, res) => {
   console.log('Catch-all route hit');
