@@ -2,12 +2,14 @@ const express = require('express');
 const serverless = require('serverless-http');
 const cors = require('cors');
 const multer = require('multer');
+const path = require('path');
 const { createWorker } = require('tesseract.js');
 const OpenAI = require('openai');
 require('dotenv').config();
-const path = require('path');
 
 const app = express();
+
+console.log('API function loaded');
 
 // Configure Multer
 const storage = multer.diskStorage({
@@ -21,19 +23,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-console.log('API function loaded');
-
 // CORS configuration
 app.use(cors({
   origin: ['https://sommai.netlify.app', 'http://localhost:3000'],
   credentials: true
 }));
 
-// Logging middleware
+// Logging middleware for all requests
 app.use((req, res, next) => {
   console.log(`Received ${req.method} request to ${req.url}`);
-  console.log('Request body:', req.body);
-  console.log('Request file:', req.file);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
   next();
 });
 
@@ -50,6 +50,8 @@ function standardizePrice(price) {
 // Make sure this line is at the beginning of your routes
 app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
   console.log('Received POST request to /submit');
+  console.log('Request body:', req.body);
+  console.log('Request file:', req.file);
   try {
     const { dish } = req.body;
     const wineListPhoto = req.file;
@@ -67,7 +69,7 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
 
     // OpenAI Processing
     const completion = await openai.chat.completions.create({
-      model: "gpt-4", // Corrected to GPT-4
+      model: "gpt-4o", // Corrected to GPT-4
       messages: [
         { role: "system", content: "You are a sommelier. Recommend wines based on the dish and wine list provided." },
         { role: "user", content: `Dish: ${dish}\nWine List:\n${text}\nRecommend 2-3 wines from this list that pair well with the dish. Include the wine name, price, and a brief description of why it pairs well. Format the response as JSON with keys: explanation, recommendations (array of objects with name, price, description), and conclusion.` }
