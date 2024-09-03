@@ -38,11 +38,22 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
       model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a helpful sommelier assistant." },
-        { role: "user", content: `Given the following wine list and dish, recommend 3 wines that would pair well. Format your response as JSON with keys for 'explanation', 'recommendations' (an array of objects with 'name', 'price', and 'description'), and 'conclusion'. Wine list: ${text}. Dish: ${dish}` }
+        { role: "user", content: `Given the following wine list and dish, recommend 3 wines that would pair well. Format your response as JSON with keys for 'explanation' (max 150 words), 'recommendations' (an array of objects with 'name', 'price', and 'description' (max 50 words each)), and 'conclusion' (max 50 words). Ensure all text fits within these limits. Wine list: ${text}. Dish: ${dish}` }
       ],
+      max_tokens: 1000,  // Increase token limit
     });
 
-    const recommendation = JSON.parse(completion.choices[0].message.content);
+    let recommendation = JSON.parse(completion.choices[0].message.content);
+
+    // Truncate descriptions if they're still too long
+    recommendation.recommendations = recommendation.recommendations.map(wine => ({
+      ...wine,
+      description: wine.description.split(' ').slice(0, 50).join(' ') + (wine.description.split(' ').length > 50 ? '...' : '')
+    }));
+
+    // Truncate explanation and conclusion if they're too long
+    recommendation.explanation = recommendation.explanation.split(' ').slice(0, 150).join(' ') + (recommendation.explanation.split(' ').length > 150 ? '...' : '');
+    recommendation.conclusion = recommendation.conclusion.split(' ').slice(0, 50).join(' ') + (recommendation.conclusion.split(' ').length > 50 ? '...' : '');
 
     res.json(recommendation);
   } catch (error) {
