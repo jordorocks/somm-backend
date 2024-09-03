@@ -8,16 +8,21 @@ require('dotenv').config();
 
 const app = express();
 
+// Configure CORS
 app.use(cors({
   origin: ['https://sommai.netlify.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
-// Make sure this is placed before your route definitions
-app.options('*', cors()); // Enable pre-flight requests for all routes
+app.options('*', cors()); // Handle preflight requests
 
-app.use(express.json());
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request to ${req.url}`);
+  next();
+});
 
 const upload = multer({ dest: '/tmp/uploads/' });
 
@@ -42,7 +47,7 @@ function standardizePrice(price) {
   return formattedPrices.join(' / ');
 }
 
-app.post('/.netlify/functions/index/submit', upload.single('wineListPhoto'), async (req, res) => {
+app.post('/', upload.single('wineListPhoto'), async (req, res) => {
   try {
     const { dish } = req.body;
     
@@ -101,6 +106,12 @@ app.post('/.netlify/functions/index/submit', upload.single('wineListPhoto'), asy
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 // For local development
