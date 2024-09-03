@@ -13,10 +13,14 @@ console.log('Function loaded');
 
 // CORS configuration
 app.use(cors({
-  origin: '*', // Be more restrictive in production
+  origin: ['https://sommai.netlify.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
+
+// Add this line to handle preflight requests
+app.options('*', cors());
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -32,11 +36,9 @@ const openai = new OpenAI({
 
 // Your existing helper functions here (e.g., standardizePrice)
 
-app.post('/', upload.single('wineListPhoto'), handleRequest);
-app.post('/:path', upload.single('wineListPhoto'), handleRequest);
-
-async function handleRequest(req, res) {
+app.post('/', upload.single('wineListPhoto'), async (req, res) => {
   console.log('Request received:', req.method, req.url);
+  console.log('Request headers:', req.headers);
   console.log('Request body:', req.body);
   console.log('Request file:', req.file);
 
@@ -59,7 +61,7 @@ async function handleRequest(req, res) {
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
-}
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -73,4 +75,5 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
+// At the end of the file
 module.exports.handler = serverless(app);
