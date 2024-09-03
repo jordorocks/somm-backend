@@ -69,21 +69,35 @@ app.post('/submit', upload.single('wineListPhoto'), async (req, res) => {
 
     // OpenAI Processing
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Corrected to GPT-4
+      model: "gpt-4", // Corrected from "gpt-4o" to "gpt-4"
       messages: [
         { role: "system", content: "You are a sommelier. Recommend wines based on the dish and wine list provided." },
-        { role: "user", content: `Dish: ${dish}\nWine List:\n${text}\nRecommend 2-3 wines from this list that pair well with the dish. Include the wine name, price, and a brief description of why it pairs well. Format the response as JSON with keys: explanation, recommendations (array of objects with name, price, description), and conclusion.` }
+        { role: "user", content: `Dish: ${dish}\nWine List:\n${text}\nRecommend 2-3 wines from this list that pair well with the dish. Include the wine name, price, and a brief description of why it pairs well. Format the response as JSON with keys: explanation, recommendations (array of objects with name, price, pairing), and conclusion.` }
       ],
     });
 
-    const recommendation = JSON.parse(completion.choices[0].message.content);
+    let recommendation = JSON.parse(completion.choices[0].message.content);
 
     // Standardize prices in the recommendation
     recommendation.recommendations.forEach(wine => {
       wine.price = standardizePrice(wine.price);
     });
 
-    res.json(recommendation);
+    // Ensure the response structure matches what the front-end expects
+    const formattedResponse = {
+      explanation: recommendation.explanation,
+      recommendations: recommendation.recommendations.map(wine => ({
+        name: wine.name,
+        price: wine.price,
+        pairing: wine.description || wine.pairing // Ensure we use the correct key
+      })),
+      conclusion: recommendation.conclusion
+    };
+
+    // Add this just before sending the response
+    console.log('Sending response:', JSON.stringify(formattedResponse, null, 2));
+
+    res.json(formattedResponse);
   } catch (error) {
     console.error('Error processing request:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
